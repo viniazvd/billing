@@ -138,7 +138,8 @@
       v-model="form.description"
     />
 
-    <c-card v-if="hasError">Preencha os campos corretamente.</c-card>
+    <c-card v-if="hasError" class="error">Preencha os campos corretamente.</c-card>
+    <c-card v-if="allFilled" class="error">Preencha todos os campos orbigatórios</c-card>
 
     <c-button
       slot="actions"
@@ -170,6 +171,7 @@ export default {
   data () {
     return {
       hasError: false,
+      allFilled: false,
       isLoading: false,
       companiesOptions: [],
       form: {
@@ -190,10 +192,12 @@ export default {
   },
 
   watch: {
-    'form.state' (x, y) {
-      if ((!this.form.state) || x !== y) {
-        this.form.city = ''
-      }
+    'form.state': {
+      handle (x, y) {
+        if ((!this.form.state) || x !== y) this.form.city = ''
+        if (this.hasError) this.hasError = false
+      },
+      deep: true
     }
   },
 
@@ -276,7 +280,8 @@ export default {
 
         this.isLoading = false
       } else {
-        this.hasError = true
+        this.allFilled = true
+        setTimeout(() => { this.allFilled = false }, 3000)
       }
     }
   }
@@ -286,3 +291,18 @@ export default {
   // }
 }
 </script>
+
+<style lang="scss">
+.form-container {
+  max-width: 400px;
+  margin: 0 auto;
+
+  & > .error {
+    display: flex;
+    justify-content: center;
+    border: unset;
+    background: red;
+    color: white;
+  }
+}
+</style>

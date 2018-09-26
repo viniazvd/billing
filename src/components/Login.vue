@@ -1,6 +1,6 @@
 <template>
   <div class="login-container">
-    <h3>LOGIN</h3>
+    <h3 class="title">LOGIN</h3>
 
     <c-form class="form-container">
       <c-input
@@ -26,7 +26,7 @@
         v-model="password"
       />
 
-      <c-card v-if="hasError">E-mail ou login inválidos</c-card>
+      <c-card v-if="hasError" class="error">E-mail ou login inválidos</c-card>
 
       <c-button
         slot="actions"
@@ -84,3 +84,23 @@ export default {
   }
 }
 </script>
+
+<style lang="scss">
+.login-container {
+  max-width: 300px;
+  margin: 0 auto;
+
+  & > .title {
+    display: flex;
+    justify-content: center;
+  }
+
+  & > .form-container > .error {
+    display: flex;
+    justify-content: center;
+    border: unset;
+    background: red;
+    color: white;
+  }
+}
+</style>
