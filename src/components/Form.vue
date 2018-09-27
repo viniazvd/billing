@@ -1,6 +1,6 @@
 
 <template>
-  <c-form v-if="mounted" class="form-container">
+  <c-form class="form-container">
     <c-select
       form-label="Empresas"
       data-vv-delay="10"
@@ -71,6 +71,17 @@
       :feedback-message="errors.first('cep')"
       :value="form.zipcode"
       @input="cepHandler"
+    />
+
+    <c-input
+      label="Rua"
+      name="street"
+      required
+      v-validate="{ required: true }"
+      data-vv-delay="10"
+      :feedback-show="errors.has('Rua')"
+      :feedback-message="errors.first('Rua')"
+      v-model="form.street"
     />
 
     <c-input
@@ -172,6 +183,7 @@ const initForm = {
   registry_code: '',
   phone: '',
   zipcode: '',
+  street: '',
   number: '',
   additional_details: '',
   neighborhood: '',
@@ -180,17 +192,11 @@ const initForm = {
   description: ''
 }
 
-function resetCity (x, y) {
-  if ((!this.form.state) || x !== y) this.form.city = {}
-}
-
 export default {
   name: 'init-form',
 
   data () {
     return {
-      mounted: true,
-      key: 0,
       hasError: false,
       allFilled: false,
       isLoading: false,
@@ -199,7 +205,13 @@ export default {
     }
   },
 
-  watch: { 'form.state': resetCity },
+  watch: {
+    'form.state': function (x, y) {
+      if (x && x.sigla !== y && y.sigla) {
+        this.form.city = this.cities.find(({ name }) => name === this.form.city.name) || {}
+      }
+    }
+  },
 
   async mounted () {
     const { data: { data: companies } } = await this.$http.get('sale/inTrial', { ...this.headers })
@@ -274,6 +286,8 @@ export default {
         this.$validator.fields.items.forEach(field => this.errors.remove(field))
         this.$validator.resume()
       })
+
+      return true
     },
 
     async submit () {
@@ -294,10 +308,7 @@ export default {
             const { data: { success } } = await this.$http.post('sale/startOnboarding', { ...payload }, { ...this.headers })
 
             if (success) {
-              const unwatch = this.$watch('form.state')
-              unwatch()
               this.resetForm()
-              return true
             } else {
               // something
               console.log('check network')
