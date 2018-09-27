@@ -63,6 +63,12 @@ export default {
   },
 
   methods: {
+    errorHandler (dataError) {
+      this.$data[dataError] = true
+      setTimeout(() => { this.$data[dataError] = false }, 3000)
+      this.isLoading = false
+    },
+
     async login () {
       const result = await this.$validator.validate()
 
@@ -79,14 +85,10 @@ export default {
             localStorage.setItem('token', token)
             this.$router.push({ name: 'form' })
           } else {
-            this.hasPermission = true
-            setTimeout(() => { this.hasPermission = false }, 3000)
-            this.isLoading = false
+            this.errorHandler('hasPermission')
           }
         } catch (error) {
-          this.hasError = true
-          setTimeout(() => { this.hasError = false }, 3000)
-          this.isLoading = false
+          this.errorHandler('hasError')
         }
       }
 
