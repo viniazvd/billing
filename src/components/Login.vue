@@ -1,7 +1,12 @@
 <template>
   <div class="login-container">
     <div class="header">
-      <img class="logo" src="../assets/img/convenia-color.png" />
+      <vue-coe-image
+        class="logo"
+        :duration="200"
+        :src="require('../assets/img/convenia-color.png')"
+        fallback="https://i.ytimg.com/vi/Yt9t9e9gmmw/maxresdefault.jpg"
+      />
     </div>
 
     <c-form class="form-container">
@@ -47,8 +52,12 @@
 </template>
 
 <script>
+import VueCoeImage from 'vue-coe-image'
+
 export default {
   name: 'login',
+
+  components: { VueCoeImage },
 
   data () {
     return {

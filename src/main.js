@@ -12,6 +12,8 @@ import Locale from 'vee-validate/dist/locale/pt_BR'
 import 'vue-convenia-components/style.scss'
 import CComponents from 'vue-convenia-components'
 
+import 'vue-coe-image/dist/vue-coe-image.css'
+
 Vue.use(axios)
 Vue.use(CComponents)
 
