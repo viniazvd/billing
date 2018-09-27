@@ -5,7 +5,7 @@ import axios from 'axios'
 
 const http = axios.create({
   // baseURL: 'https://staging.core.convenia.com.br/api/v1/',
-  baseURL: 'http://41ed64f3.ngrok.io/api/v1/',
+  baseURL: 'http://29c26182.ngrok.io/api/v1/',
   headers: {
     'Content-Type': 'application/json'
     // 'Authorization': `Bearer ${token}`

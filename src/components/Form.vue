@@ -1,6 +1,6 @@
 
 <template>
-  <c-form class="form-container">
+  <c-form v-if="mounted" class="form-container">
     <c-select
       form-label="Empresas"
       data-vv-delay="10"
@@ -165,41 +165,41 @@ import cepPromise from 'cep-promise'
 
 Validator.extend('cnpj', isCNPJRule)
 
+const initForm = {
+  companies: [],
+  name: '',
+  email: '',
+  registry_code: '',
+  phone: '',
+  zipcode: '',
+  number: '',
+  additional_details: '',
+  neighborhood: '',
+  state: {},
+  city: {},
+  description: ''
+}
+
+function resetCity (x, y) {
+  if ((!this.form.state) || x !== y) this.form.city = {}
+}
+
 export default {
   name: 'init-form',
 
   data () {
     return {
+      mounted: true,
+      key: 0,
       hasError: false,
       allFilled: false,
       isLoading: false,
       companiesOptions: [],
-      form: {
-        companies: [],
-        name: '',
-        email: '',
-        registry_code: '',
-        phone: '',
-        zipcode: '',
-        number: '',
-        additional_details: '',
-        neighborhood: '',
-        state: {},
-        city: {},
-        description: ''
-      }
+      form: { ...initForm }
     }
   },
 
-  watch: {
-    'form.state': {
-      handle (x, y) {
-        if ((!this.form.state) || x !== y) this.form.city = ''
-        if (this.hasError) this.hasError = false
-      },
-      deep: true
-    }
-  },
+  watch: { 'form.state': resetCity },
 
   async mounted () {
     const { data: { data: companies } } = await this.$http.get('sale/inTrial', { ...this.headers })
@@ -228,15 +228,27 @@ export default {
       }
 
       return []
+    },
+
+    formFilled () {
+      const requireds = Object.keys(this.form).filter(required => required !== 'additional_details')
+
+      return this.isFormValid(requireds, this.form)
     }
   },
 
   methods: {
     async cepHandler (cep) {
       if (cep.length === 9) {
-        const { cep: zipcode, ...address } = await cepPromise(cep).catch(err => console.warn(err))
+        const { cep: zipcode, state, city, ...address } = await cepPromise(cep).catch(err => console.warn(err))
 
-        this.form = { ...this.form, ...address, zipcode }
+        this.form = {
+          ...this.form,
+          state: { sigla: state },
+          city: { name: city },
+          ...address,
+          zipcode
+        }
       }
     },
 
@@ -246,12 +258,26 @@ export default {
       return requireds.every(isValid)
     },
 
+    errorHandler () {
+      this.hasError = true
+      this.isLoading = false
+      setTimeout(() => { this.hasError = false }, 3000)
+    },
+
+    resetForm () {
+      this.form = initForm
+      this.$validator.pause()
+
+      this.$nextTick(() => {
+        this.$validator.errors.clear()
+        this.$validator.fields.items.forEach(field => field.reset())
+        this.$validator.fields.items.forEach(field => this.errors.remove(field))
+        this.$validator.resume()
+      })
+    },
+
     async submit () {
-      const requireds = Object.keys(this.form).filter(required => required !== 'additional_details')
-
-      const allFilled = this.isFormValid(requireds, this.form)
-
-      if (allFilled) {
+      if (this.formFilled) {
         const result = await this.$validator.validateAll()
 
         this.isLoading = true
@@ -265,17 +291,23 @@ export default {
           }
 
           try {
-            const response = await this.$http.post('sale/startOnboarding', { ...payload }, { ...this.headers })
-            console.log('response', response)
+            const { data: { success } } = await this.$http.post('sale/startOnboarding', { ...payload }, { ...this.headers })
 
-            // this.form = {}
+            if (success) {
+              const unwatch = this.$watch('form.state')
+              unwatch()
+              this.resetForm()
+              return true
+            } else {
+              // something
+              console.log('check network')
+              return true
+            }
           } catch (error) {
-            this.isLoading = false
-            this.hasError = true
+            this.errorHandler()
           }
         } else {
-          this.hasError = true
-          this.isLoading = false
+          this.errorHandler()
         }
 
         this.isLoading = false
@@ -285,10 +317,6 @@ export default {
       }
     }
   }
-
-  // beforeDestroy () {
-  //   localStorage.removeItem('token')
-  // }
 }
 </script>
 

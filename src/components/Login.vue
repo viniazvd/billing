@@ -1,6 +1,8 @@
 <template>
   <div class="login-container">
-    <h3 class="title">LOGIN</h3>
+    <div class="header">
+      <img class="logo" src="../assets/img/convenia-color.png" />
+    </div>
 
     <c-form class="form-container">
       <c-input
@@ -27,6 +29,7 @@
       />
 
       <c-card v-if="hasError" class="error">E-mail ou login inválidos</c-card>
+      <c-card v-if="hasPermission" class="error">Usuário sem permissão</c-card>
 
       <c-button
         slot="actions"
@@ -52,7 +55,8 @@ export default {
       email: '',
       password: '',
       isLoading: false,
-      hasError: false
+      hasError: false,
+      hasPermission: false
     }
   },
 
@@ -72,9 +76,14 @@ export default {
           if (hasPermission) {
             localStorage.setItem('token', token)
             this.$router.push({ name: 'form' })
+          } else {
+            this.hasPermission = true
+            setTimeout(() => { this.hasPermission = false }, 3000)
+            this.isLoading = false
           }
         } catch (error) {
           this.hasError = true
+          setTimeout(() => { this.hasError = false }, 3000)
           this.isLoading = false
         }
       }
@@ -90,7 +99,7 @@ export default {
   max-width: 300px;
   margin: 0 auto;
 
-  & > .title {
+  & > .header {
     display: flex;
     justify-content: center;
   }

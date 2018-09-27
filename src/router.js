@@ -1,7 +1,8 @@
 import Vue from 'vue'
 import Router from 'vue-router'
 
-const load = component => () => import(`./components/${component}.vue`)
+const loadComponent = component => () => import(`./components/${component}.vue`)
+const loadView = component => () => import(`./views/${component}.vue`)
 
 Vue.use(Router)
 
@@ -9,16 +10,23 @@ export default new Router({
   mode: 'history',
   routes: [
     {
-      path: '/',
+      path: '/login',
       name: 'login',
-      component: load('Login'),
+      component: loadComponent('Login'),
       meta: { requiresAuth: false }
     },
     {
-      path: '/form',
-      name: 'form',
-      component: load('Form'),
-      meta: { requiresAuth: true }
+      path: '/',
+      name: 'logged',
+      component: loadView('Logged'),
+      meta: { requiresAuth: true },
+      children: [
+        {
+          path: '/form',
+          name: 'form',
+          component: loadComponent('Form')
+        }
+      ]
     }
   ]
 })
