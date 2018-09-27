@@ -13,7 +13,7 @@
         data-vv-delay="10"
         :feedback-show="errors.has('Email')"
         :feedback-message="errors.first('Email')"
-        v-model="email"
+        v-model="user.email"
       />
 
       <c-input
@@ -25,7 +25,7 @@
         data-vv-delay="10"
         :feedback-show="errors.has('Password')"
         :feedback-message="errors.first('Password')"
-        v-model="password"
+        v-model="user.password"
       />
 
       <c-card v-if="hasError" class="error">E-mail ou login inválidos</c-card>
@@ -52,8 +52,10 @@ export default {
 
   data () {
     return {
-      email: '',
-      password: '',
+      user: {
+        email: '',
+        password: ''
+      },
       isLoading: false,
       hasError: false,
       hasPermission: false
@@ -68,7 +70,7 @@ export default {
 
       if (result) {
         try {
-          const { data: { data: { employee, api_token: token } } } = await this.$http.post('user/login', { email: this.email, password: this.password })
+          const { data: { data: { employee, api_token: token } } } = await this.$http.post('user/login', { ...this.$data.user })
 
           const permissionCode = 2756
           const hasPermission = employee && employee.company_id === permissionCode
