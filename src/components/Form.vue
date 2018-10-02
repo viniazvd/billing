@@ -301,7 +301,7 @@ export default {
             ...this.form,
             companies: this.form.companies.map(({ company: { id } }) => id.toString()),
             state: this.form.state && this.form.state.sigla,
-            city: this.form.state && this.form.state.city
+            city: this.form.name && this.form.name.city
           }
 
           try {
